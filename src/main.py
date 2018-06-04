@@ -13,7 +13,7 @@ import uuid
 class GUI(QWidget):
     # instance variable
 
-    OUTPUT_PATH = '/home/gin/Documents/pnu-newsletter'
+    OUTPUT_PATH = folder = os.path.expanduser('~{}Pictures{}pnu-newsletter'.format(os.path.sep,os.path.sep))
 
     def __init__(self):
         super().__init__()
