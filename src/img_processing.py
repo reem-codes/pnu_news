@@ -37,7 +37,7 @@ def img_heights(a, newpath):
 
 def make_ads(newpath, imgs):
     pth = imgs[0]['path'] + '/'
-    difference = [0,0]
+    difference = [0, 0]
     r = []
     l = []
     heights = img_heights(a=[], newpath=newpath)
@@ -71,9 +71,9 @@ def newsletter(output_path, process_id):
     head = Image.open('image/head.png')
     tail = Image.open('image/tail.png')
     nl = Image.new(mode='RGB', size=(1300, ads.height + 600) , color='#E5DFD5')
-    nl.paste(head, (0,0))
-    nl.paste(tail, (0,ads.height+350))
-    nl.paste(ads, (35,300))
+    nl.paste(head, (0, 0))
+    nl.paste(tail, (0, ads.height+350))
+    nl.paste(ads, (35, 300))
     nl.save(os.path.abspath(output_path) + '/newsletter_{}.png'.format(process_id))
     nl.show()
 
