@@ -1,9 +1,6 @@
 from PIL import Image
 import math
-import sys
 import os
-import ntpath
-import shutil
 
 
 MAX_WIDTH_IMAGE = 600

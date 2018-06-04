@@ -2,7 +2,6 @@ import sys
 import os
 import ntpath
 import shutil
-from IPython.core.display import Image
 import img_processing as imgp
 from PyQt5.QtWidgets import QWidget, QLabel, QApplication, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QFileDialog
 from PyQt5.QtGui import QPixmap
@@ -60,9 +59,9 @@ class GUI(QWidget):
 
         self.setLayout(self.layout)
 
-        self.setWindowTitle('PNU newsletter by reem-codes')
         self.setAcceptDrops(True)
         self.setFixedWidth(700)
+
         self.show()
 
         uploading_label.mousePressEvent = self.load_image_folder
@@ -74,7 +73,10 @@ class GUI(QWidget):
     def start_process(self):
         self.process_id = str(uuid.uuid4())
         print("new process {}".format(self.process_id))
+        self.setWindowTitle('PNU newsletter by reem-codes | process {}'.format(self.process_id))
         self.img_process_path = 'image/proc_{}/'.format(self.process_id)
+        self.filenames = []
+        self.imgs = []
         return
 
     def change_path(self):
@@ -191,7 +193,15 @@ class GUI(QWidget):
 
     def start(self):
         imgp.main(self.path.text(), self.imgs, self.process_id)
-        self.error_label.setText('Done :D')
+        self.error_label.setText('process {} is Done :D'.format(self.process_id))
+        if os.path.exists(self.img_process_path):
+            shutil.rmtree(self.img_process_path)
+        for i in reversed(range(self.input_details.count())):
+            layout = self.input_details.itemAt(i).layout()
+            for j in reversed(range(layout.count())):
+                layout.itemAt(j).widget().setParent(None)
+            self.input_details.removeItem(layout)
+        self.start_process()
         return
 
     def keyPressEvent(self, e):
