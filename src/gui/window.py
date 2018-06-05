@@ -1,7 +1,8 @@
 import sys
 import os
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QGridLayout, QHBoxLayout, QVBoxLayout, \
-                        QLabel, QPushButton, QFileDialog, QLineEdit
+                        QLabel, QPushButton, QFileDialog, QLineEdit, QDesktopWidget
+from PyQt5.QtCore import Qt
 from functools import partial
 import uuid
 import ntpath
@@ -54,34 +55,30 @@ class GridLayout(QWidget):
         f = self.filenames[x]
         head, filename = ntpath.split(f)
         fn, ext = os.path.splitext(filename)
-        img_detail['filename'] = fn
+        img_detail['filename'] = x
         img_detail['ext'] = ext
         img_detail['position'] = x
-        img_detail['filepath'] = os.path.abspath(self.img_process_path) + '/' + filename
+        img_detail['filepath'] = self.img_process_path + '/' + str(x) + ext
         self.imgs[x] = img_detail
 
-        newpath = os.path.abspath(self.img_process_path)
-        if not os.path.exists(newpath):
-            os.makedirs(newpath)
+        if not os.path.exists(self.img_process_path):
+            os.makedirs(self.img_process_path)
         shutil.copy(f, img_detail['filepath'])
 
-        if len(self.imgs) is self.num:
-            self.start_button.setEnabled(True)
-        else:
-            self.start_button.setEnabled(False)
-            self.error_lbl.setText(self.err_message)
-        return
+        self.start_button.setEnabled(True)
+        for i in self.imgs:
+            if i is None:
+                self.start_button.setEnabled(False)
+                self.error_lbl.setText(self.err_message)
 
 
 class GeneralInfo(QWidget):
 
-    def __init__(self, id, out_path, parent=None):
+    def __init__(self, parent=None):
         super(GeneralInfo, self).__init__(parent)
         # number of pictures layout
-        self.process_id = id
         self.OUTPUT_PATH = os.path.expanduser('~{0}Pictures{0}pnu-newsletter'.format(os.path.sep))
         self.NUMBER = 10
-
         self.init_ui()
 
     def init_ui(self):
@@ -128,7 +125,6 @@ class GeneralInfo(QWidget):
 
             else:
                 self.NUMBER = int(text)
-                print(self.get_number())
         except ValueError:
             self.error_lbl.setText('The value entered is not an integer')
             self.qle.setText(str(self.NUMBER))
@@ -142,7 +138,9 @@ class Done(QWidget):
 
     def init_ui(self):
         self.make_another = QPushButton("make another")
-        self.close_btn = QPushButton("Cancel")
+        self.close_btn = QPushButton("Close")
+        label = QLabel("Done :D")
+        label.setAlignment(Qt.AlignCenter)
 
         hbox = QHBoxLayout()
         hbox.addStretch(1)
@@ -151,52 +149,55 @@ class Done(QWidget):
 
         vbox = QVBoxLayout()
         vbox.addStretch(1)
+        vbox.addWidget(label)
         vbox.addLayout(hbox)
-
+        vbox.setAlignment(Qt.AlignCenter)
         self.setLayout(vbox)
 
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setGeometry(50, 50, 400, 450)
-        self.setFixedSize(500, 450)
-        self.imgs = []
-
+        fg = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        fg.moveCenter(cp)
+        self.move(fg.topLeft())
+        # self.setGeometry(50, 50, 400, 450)
+        # self.setFixedSize(500, 450)
         self.start_general_ui()
 
     def start_process(self):
 
         self.process_id = str(uuid.uuid4())
         print("new process {}".format(self.process_id))
-        self.img_process_path = '../../image/proc_{}/'.format(self.process_id)
+        self.img_process_path = os.path.abspath('../../image/proc_{}/'.format(self.process_id))
 
     def start_general_ui(self):
         self.start_process()
 
-        self.general = GeneralInfo(self.process_id, self.img_process_path)
+        self.general = GeneralInfo()
         self.setWindowTitle('PNU newsletter by reem-codes | process {}'.format(self.process_id))
         self.setCentralWidget(self.general)
         self.general.choose_layout.clicked.connect(self.load_grid_images)
+
         self.show()
-        self.NUMBER = self.general.NUMBER
-        self.OUTPUT_PATH = self.general.OUTPUT_PATH
 
     def load_grid_images(self):
-        self.grid_layout = GridLayout(self.NUMBER, self.process_id,
+        self.grid_layout = GridLayout(self.general.NUMBER, self.process_id,
                                       self.img_process_path)
         self.setWindowTitle('Chose positions | process {}'.format(self.process_id))
 
         self.setCentralWidget(self.grid_layout)
-        self.grid_layout.start_button.clicked.connect(self.start_process)
+        self.grid_layout.start_button.clicked.connect(self.start_image_process)
         self.show()
 
-    def start_process(self):
-        self.image_process = layout.GridLayout(self.grid_layout.imgs, self.OUTPUT_PATH, self.process_id)
+    def start_image_process(self):
+        self.image_process = layout.GridLayout(self.grid_layout.imgs, self.img_process_path,
+                                               self.general.OUTPUT_PATH, self.process_id)
         self.done = Done(self)
 
         self.setCentralWidget(self.done)
-        self.done.close_btn.clicked.connect(self.closeEvent)
+        self.done.close_btn.clicked.connect(self.close)
         self.done.make_another.clicked.connect(self.redo)
         self.show()
 
@@ -212,6 +213,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.end_process()
+        return
 
 
 if __name__ == '__main__':

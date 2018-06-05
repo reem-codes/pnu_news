@@ -5,7 +5,7 @@ from functools import reduce
 
 class Layout:
 
-    def __init__(self, images, output_path, process_id):
+    def __init__(self, images, working_d, output_path, process_id):
         """
         :param images: a list of dictionaries containing the image
             filepath,
@@ -17,11 +17,14 @@ class Layout:
             height
             edited_filepath
         """
-        self.images = list()
+        self.fixed_images_dir = os.path.abspath('../../image')
+        self.images = images
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
         self.output_path = output_path
         self.process_id = process_id
         self.MAX_WIDTH = 600
-        self.directory = images[0]['filepath'] + '/' + '600'
+        self.directory = working_d + '/' + '600'
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 
@@ -40,8 +43,8 @@ class Layout:
 
 class GridLayout(Layout):
 
-    def __init__(self, images, output_path, process_id):
-        super().__init__(images, output_path, process_id)
+    def __init__(self, images, working_d, output_path, process_id):
+        super().__init__(images, working_d, output_path, process_id)
         self.main()
 
     def make_ad(self):
@@ -58,20 +61,21 @@ class GridLayout(Layout):
         ads = Image.new(mode='RGB', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * 15), color='#E5DFD5')
         ads.save('{}/ads.png'.format(self.directory))
 
-        for i, x in r, range(len(r)):
-            ads.paste(i['edited_filepath'],
-                      (630, x * 15 + sum([i['height'] for i in r[0:x - 1]]) if x > 0 else 0))
+        for i, x in zip(r, range(len(r))):
+            print(i, x)
+            ads.paste(Image.open(i['edited_filepath']),
+                      (630, (x * 15 + sum([i['height'] for i in r[0:x]]) if x > 0 else 0)))
 
-        for i, x in l, range(len(l)):
-            ads.paste(i['edited_filepath'],
-                      (0, x * 15 + sum([i['height'] for i in l[0:x - 1]]) if x > 0 else 0))
+        for i, x in zip(l, range(len(l))):
+            ads.paste(Image.open(i['edited_filepath']),
+                      (0, x * 15 + sum([i['height'] for i in l[0:x]]) if x > 0 else 0))
 
-        ads.save()
+        ads.save('{}/ads.png'.format(self.directory))
 
     def newsletter(self):
-        ads = Image.open('image/proc_{}/ads.png'.format(self.process_id))
-        head = Image.open('image/head.png')
-        tail = Image.open('image/tail.png')
+        ads = Image.open('{}/ads.png'.format(self.directory))
+        head = Image.open('{}/head.png'.format(self.fixed_images_dir))
+        tail = Image.open('{}/tail.png'.format(self.fixed_images_dir))
         nl = Image.new(mode='RGB', size=(1300, ads.height + 600), color='#E5DFD5')
         nl.paste(head, (0, 0))
         nl.paste(tail, (0, ads.height + 350))
@@ -80,8 +84,7 @@ class GridLayout(Layout):
         nl.show()
 
     def main(self):
-        print("Hello baby :3")
-        # for i in self.images:
-        #     self.save_editied_image(i)
-        # self.make_ad()
-        # self.newsletter()
+        for i in self.images:
+            self.save_editied_image(i)
+        self.make_ad()
+        self.newsletter()
