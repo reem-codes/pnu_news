@@ -1,6 +1,7 @@
 from PIL import Image
 import os
 from functools import reduce
+import math
 
 
 class Layout:
@@ -53,6 +54,7 @@ class GridLayout(Layout):
         even numbers = l | odd numbers = r
         :return:
         """
+        MARGIN = 15
         r = [i for i in self.images if i['position'] % 2]
         l = [i for i in self.images if not i['position'] % 2]
         r_sum = 0
@@ -62,18 +64,27 @@ class GridLayout(Layout):
         if l:
             l_sum = reduce((lambda h1, h2: h1 + h2), [i['height'] for i in l])
 
-        ads = Image.new(mode='RGB', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * 15), color='#E5DFD5')
+        # + l is bigger - r is larger
+        difference = (l_sum + MARGIN * (len(l) - 1)) - (r_sum + MARGIN * (len(r) - 1))
+        print("the difference", difference)
+        ads = Image.new(mode='RGB', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * MARGIN), color='#E5DFD5')
         ads.save('{}/ads.png'.format(self.directory))
 
         for i, x in zip(r, range(len(r))):
-            print(i, x)
             ads.paste(Image.open(i['edited_filepath']),
-                      (630, (x * 15 + sum([i['height'] for i in r[0:x]]) if x > 0 else 0)))
+                      (630, (
+                              x * MARGIN
+                              + (sum([i['height'] for i in r[0:x]]) if x > 0 else 0)
+                              + ((x + 1) * math.floor(math.fabs(difference / (len(r) + 1)) if difference > 0 else 0))
+                            )))
 
         for i, x in zip(l, range(len(l))):
             ads.paste(Image.open(i['edited_filepath']),
-                      (0, x * 15 + sum([i['height'] for i in l[0:x]]) if x > 0 else 0))
-
+                      (0, (
+                              x * MARGIN
+                              + (sum([i['height'] for i in l[0:x]]) if x > 0 else 0)
+                              + ((x + 1) * math.floor(math.fabs(difference / (len(l) + 1)) if difference < 0 else 0))
+                            )))
         ads.save('{}/ads.png'.format(self.directory))
 
     def newsletter(self):
