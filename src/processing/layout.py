@@ -41,7 +41,7 @@ class Layout:
 class GridLayout(Layout):
 
     def __init__(self, images, output_path, process_id):
-        super.__init__(images, output_path, process_id)
+        super().__init__(images, output_path, process_id)
         self.main()
 
     def make_ad(self):
@@ -80,7 +80,8 @@ class GridLayout(Layout):
         nl.show()
 
     def main(self):
-        for i in self.images:
-            self.save_editied_image(i)
-        self.make_ad()
-        self.newsletter()
+        print("Hello baby :3")
+        # for i in self.images:
+        #     self.save_editied_image(i)
+        # self.make_ad()
+        # self.newsletter()

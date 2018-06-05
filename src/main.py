@@ -13,13 +13,12 @@ import uuid
 class GUI(QWidget):
     # instance variable
 
-    OUTPUT_PATH = folder = os.path.expanduser('~{}Pictures{}pnu-newsletter'.format(os.path.sep,os.path.sep))
+    OUTPUT_PATH = os.path.expanduser('~{}Pictures{}pnu-newsletter'.format(os.path.sep,os.path.sep))
 
     def __init__(self):
         super().__init__()
         self.init_ui()
-        self.filenames = []
-        self.imgs = []
+
 
     def init_ui(self):
 
