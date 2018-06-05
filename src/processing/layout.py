@@ -55,8 +55,12 @@ class GridLayout(Layout):
         """
         r = [i for i in self.images if i['position'] % 2]
         l = [i for i in self.images if not i['position'] % 2]
-        r_sum = reduce((lambda h1, h2: h1 + h2), [i['height'] for i in r])
-        l_sum = reduce((lambda h1, h2: h1 + h2), [i['height'] for i in l])
+        r_sum = 0
+        l_sum = 0
+        if r:
+            r_sum = reduce((lambda h1, h2: h1 + h2), [i['height'] for i in r])
+        if l:
+            l_sum = reduce((lambda h1, h2: h1 + h2), [i['height'] for i in l])
 
         ads = Image.new(mode='RGB', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * 15), color='#E5DFD5')
         ads.save('{}/ads.png'.format(self.directory))

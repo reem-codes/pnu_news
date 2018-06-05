@@ -143,12 +143,12 @@ class Done(QWidget):
         label.setAlignment(Qt.AlignCenter)
 
         hbox = QHBoxLayout()
-        hbox.addStretch(1)
+        # hbox.addStretch(1)
         hbox.addWidget(self.make_another)
         hbox.addWidget(self.close_btn)
 
         vbox = QVBoxLayout()
-        vbox.addStretch(1)
+        # vbox.addStretch(1)
         vbox.addWidget(label)
         vbox.addLayout(hbox)
         vbox.setAlignment(Qt.AlignCenter)
