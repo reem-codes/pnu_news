@@ -99,7 +99,7 @@ class GridLayout(Layout):
         gb.putalpha(50)
         nl.paste(gb, gb)
         nl.paste(head, (0, 0), head)
-        nl.paste(tail, (0, ads.height + 350), tail)
+        # nl.paste(tail, (0, ads.height + 350), tail)
         nl.paste(ads, (35, 300), ads)
         nl.save(os.path.abspath(self.output_path) + '{}newsletter_{}.png'.format(os.path.sep, self.process_id))
         nl.show()
