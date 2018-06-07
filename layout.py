@@ -2,7 +2,7 @@ from PIL import Image
 import os
 from functools import reduce
 import math
-import gradient as g
+
 
 class Layout:
 
@@ -94,19 +94,35 @@ class GridLayout(Layout):
         head = Image.open('{}{}headT.png'.format(self.fixed_images_dir, os.path.sep))
         tail = Image.open('{}{}tailT.png'.format(self.fixed_images_dir, os.path.sep))
         size = (1300, ads.height + 600)
-        startColor =  (255,187,187)
-        endColorX =  (169,241,223)
-        endColorY =  (111,214,255)
-        # nl = Image.new(mode='RGB', size=(1300, ads.height + 600), color='#E5DFD5')
-        nl = g.make_gradient(startColor, endColorX, endColorY, size)
+        nl = Image.new(mode='RGB', size=size, color='#E5DFD5')
+        gb = self.make_repeated_background('{}{}bg.jpg'.format(self.fixed_images_dir, os.path.sep), size)
+        gb.putalpha(50)
+        nl.paste(gb, gb)
         nl.paste(head, (0, 0), head)
         nl.paste(tail, (0, ads.height + 350), tail)
         nl.paste(ads, (35, 300), ads)
         nl.save(os.path.abspath(self.output_path) + '{}newsletter_{}.png'.format(os.path.sep, self.process_id))
         nl.show()
 
+    def make_repeated_background(self, background_filepath, size):
+        bg = Image.open(background_filepath)
+
+        bg_w, bg_h = bg.size
+
+        new_im = Image.new('RGB', size)
+
+        w, h = new_im.size
+
+        for i in range(0, w, bg_w):
+            for j in range(0, h, bg_h):
+                # bg = Image.eval(bg, lambda x: x + (i + j) / 1000)
+
+                new_im.paste(bg, (i, j))
+        return new_im
+
     def main(self):
         for i in self.images:
             self.save_editied_image(i)
         self.make_ad()
         self.newsletter()
+
