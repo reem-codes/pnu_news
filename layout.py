@@ -2,7 +2,7 @@ from PIL import Image
 import os
 from functools import reduce
 import math
-
+import gradient as g
 
 class Layout:
 
@@ -18,14 +18,15 @@ class Layout:
             height
             edited_filepath
         """
-        self.fixed_images_dir = os.path.abspath('../../image')
+        self.fixed_images_dir = os.path.abspath(os.getcwd() + '{}image'.format(os.path.sep))
+
         self.images = images
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         self.output_path = output_path
         self.process_id = process_id
         self.MAX_WIDTH = 600
-        self.directory = working_d + '/' + '600'
+        self.directory = working_d + os.path.sep + '600'
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 
@@ -34,8 +35,8 @@ class Layout:
             i = Image.open(image['filepath'])
             i.thumbnail((self.MAX_WIDTH, self.MAX_WIDTH * i.height / i.width))
             image['height'] = i.height
-            image['edited_filepath'] = '{}/{}_{}_{}.png'\
-                .format(self.directory, image['position'], self.MAX_WIDTH, i.height)
+            image['edited_filepath'] = '{}{}{}_{}_{}.png'\
+                .format(self.directory,os.path.sep, image['position'], self.MAX_WIDTH, i.height)
             i.save(image['edited_filepath'])
 
         except IOError:
@@ -67,11 +68,11 @@ class GridLayout(Layout):
         # + l is bigger - r is larger
         difference = (l_sum + MARGIN * (len(l) - 1)) - (r_sum + MARGIN * (len(r) - 1))
         print("the difference", difference)
-        ads = Image.new(mode='RGB', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * MARGIN), color='#E5DFD5')
-        ads.save('{}/ads.png'.format(self.directory))
-
+        ads = Image.new(mode='RGBA', size=(1230, (l_sum if r_sum < l_sum else r_sum) + 2 * MARGIN))
+        ads.save('{}{}ads.png'.format(self.directory, os.path.sep))
         for i, x in zip(r, range(len(r))):
-            ads.paste(Image.open(i['edited_filepath']),
+            image = Image.open(i['edited_filepath'])
+            ads.paste(image,
                       (630, (
                               x * MARGIN
                               + (sum([i['height'] for i in r[0:x]]) if x > 0 else 0)
@@ -79,23 +80,29 @@ class GridLayout(Layout):
                             )))
 
         for i, x in zip(l, range(len(l))):
-            ads.paste(Image.open(i['edited_filepath']),
+            image = Image.open(i['edited_filepath'])
+            ads.paste(image,
                       (0, (
                               x * MARGIN
                               + (sum([i['height'] for i in l[0:x]]) if x > 0 else 0)
                               + ((x + 1) * math.floor(math.fabs(difference / (len(l) + 1)) if difference < 0 else 0))
                             )))
-        ads.save('{}/ads.png'.format(self.directory))
+        ads.save('{}{}ads.png'.format(self.directory, os.path.sep))
 
     def newsletter(self):
-        ads = Image.open('{}/ads.png'.format(self.directory))
-        head = Image.open('{}/head.png'.format(self.fixed_images_dir))
-        tail = Image.open('{}/tail.png'.format(self.fixed_images_dir))
-        nl = Image.new(mode='RGB', size=(1300, ads.height + 600), color='#E5DFD5')
-        nl.paste(head, (0, 0))
-        nl.paste(tail, (0, ads.height + 350))
-        nl.paste(ads, (35, 300))
-        nl.save(os.path.abspath(self.output_path) + '/newsletter_{}.png'.format(self.process_id))
+        ads = Image.open('{}{}ads.png'.format(self.directory, os.path.sep))
+        head = Image.open('{}{}headT.png'.format(self.fixed_images_dir, os.path.sep))
+        tail = Image.open('{}{}tailT.png'.format(self.fixed_images_dir, os.path.sep))
+        size = (1300, ads.height + 600)
+        startColor =  (255,187,187)
+        endColorX =  (169,241,223)
+        endColorY =  (111,214,255)
+        # nl = Image.new(mode='RGB', size=(1300, ads.height + 600), color='#E5DFD5')
+        nl = g.make_gradient(startColor, endColorX, endColorY, size)
+        nl.paste(head, (0, 0), head)
+        nl.paste(tail, (0, ads.height + 350), tail)
+        nl.paste(ads, (35, 300), ads)
+        nl.save(os.path.abspath(self.output_path) + '{}newsletter_{}.png'.format(os.path.sep, self.process_id))
         nl.show()
 
     def main(self):

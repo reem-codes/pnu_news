@@ -1,4 +1,5 @@
 backcall==0.1.0
+cx-Freeze==5.1.1
 decorator==4.3.0
 ipython-genutils==0.2.0
 jedi==0.12.0
@@ -6,7 +7,6 @@ parso==0.2.1
 pexpect==4.6.0
 pickleshare==0.7.4
 Pillow==5.1.0
-pkg-resources==0.0.0
 prompt-toolkit==1.0.15
 ptyprocess==0.5.2
 Pygments==2.2.0

@@ -7,7 +7,7 @@ from functools import partial
 import uuid
 import ntpath
 import shutil
-from src.processing import layout
+import layout
 
 
 class GridLayout(QWidget):
@@ -170,8 +170,8 @@ class MainWindow(QMainWindow):
 
         self.process_id = str(uuid.uuid4())
         print("new process {}".format(self.process_id))
-        self.img_process_path = os.path.abspath('../../image/proc_{}/'.format(self.process_id))
-
+        self.img_process_path = os.path.abspath(os.getcwd() + '{1}image{1}proc_{0}{1}'.format(self.process_id, os.path.sep))
+        print(self.img_process_path)
     def start_general_ui(self):
         self.start_process()
 
